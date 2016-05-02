@@ -2,6 +2,11 @@
 use \App\User;
 use \App\Post;
 use \App\Address;
+use \App\Staff;
+use \App\Photo;
+use \App\Product;
+use \App\Tag;
+use App\Video;
 
 Route::get(/**
  * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
@@ -142,7 +147,92 @@ Route::get('role/detach', function () {
  * sync mehtod places the data that are in the array
  */
 
-Route::any('/role/sync', function(){
-   $user = User::findOrFail(2);
-    $user->roles()->sync([1,2,4]);
+Route::any('/role/sync', function () {
+    $user = User::findOrFail(2);
+    $user->roles()->sync([1, 2, 4]);
+});
+
+/**
+ * Has many through relationship among staff, product and photos
+ */
+
+Route::get('staff/create', function () {
+    $staff = new \App\Staff(['name' => 'Debnath']);
+    $staff->save();
+});
+Route::get('photo/create', function () {
+    $staff = Staff::find(1);
+    $staff->photos()->create(['path' => 'example.jpg']);
+});
+Route::get('photo/read', function () {
+    $staff = Staff::find(1);
+    foreach ($staff->photos as $photo) {
+        echo $photo->path;
+    }
+});
+
+Route::get('/photo/update', function () {
+    $staff = Staff::findOrFail(1);
+    $photo = $staff->photos()->whereId(1)->first();
+    $photo->path = 'update.jpg';
+    $photo->save();
+});
+
+Route::get('/photo/delete', function () {
+    $staff = Staff::findOrFail(1);
+    $staff->photos()->whereId(1)->delete();
+});
+Route::get('/photo/assign', function () {
+    $staff = Staff::findOrFail(1);
+    $photo = Photo::findOrFail(3);
+    $staff->photos()->save($photo);
+});
+
+/**
+ * Polymorphic relationship among post, tag and video
+ */
+Route::get('video/create', function () {
+    $staff = new Video(['name' => 'bangla.mp3']);
+    $staff->save();
+});
+Route::get('tag/create', function () {
+    $post = Post::find(5);
+    $post_tag = Tag::find(2);
+    $post->tags()->save($post_tag);
+
+    $video = Video::find(1);
+    $video_tag = Tag::find(3);
+    $video->tags()->save($video_tag);
+});
+
+Route::get('/tag/read', function () {
+//    $post = Post::findOrFail(5);
+    $post = Video::findOrFail(1);
+    foreach ($post->tags as $tag) {
+        echo $tag->name.'<br/>';
+    }
+});
+Route::get('/tag/update', function () {
+    $post = Post::findOrFail(5);
+    $video= Video::findOrFail(1);
+//    foreach ($post->tags as $tag) {
+//        echo $tag->whereId(1)->update(['name'=> 'PHP']);
+//    }
+
+    $tag = Tag::find(2);
+
+//   $post->tags()->attach($tag);
+//    $video->tags()->attach($tag);
+    $video->tags()->sync([1,2,3]);
+});
+
+/**
+ * this will delte the tag no 3 which relates to the post no 5 in the
+ * taggable table
+ */
+Route::get('/tag/delete', function(){
+    $post = Post::findOrFail(5);
+    foreach ($post->tags as $tag) {
+        echo $tag->whereId(3)->delete();
+    }
 });

@@ -4,18 +4,14 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Post extends Model
+class Address extends Model
 {
-
     protected $fillable = [
-        'title',
-        'body',
+        'name',
     ];
 
     public function user()
     {
-        return $this->belongsTo('App\User');
-}
-
-
+        $this->belongsTo('App\User');
+    }
 }

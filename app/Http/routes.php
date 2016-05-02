@@ -81,3 +81,68 @@ Route::get('post/user', function () {
     return $post->user->name;
 });
 
+/**
+ * Many to many relationship between user and role
+ */
+
+Route::get('role/create', function () {
+//    $role = new \App\Role();
+//    $role->name = 'Administrator';
+//    $role->save();
+
+    $user = User::find(2);
+
+    $role = new \App\Role(['name' => 'Subscriber']);
+//    $role = \App\Role::find(2);
+    $user->roles()->save($role);
+});
+
+Route::get('/role/read', function () {
+    $user = User::findOrFail(2);
+//    dd($user->roles());
+    foreach ($user->roles as $role) {
+        echo $role->name . '<br>';
+    }
+});
+
+Route::get('/role/update', function () {
+    $user = User::findOrFail(1);
+    if ($user->has('roles')) {
+        foreach ($user->roles as $role) {
+            if ($role->name == 'administrator') {
+                $role->name = 'Administrator';
+                $role->save();
+            }
+        }
+    }
+});
+
+Route::get('/role/delete', function () {
+    $user = User::findOrFail(1);
+
+    foreach ($user->roles as $role) {
+        $role->whereId(3)->delete();
+    }
+});
+/**
+ * attach method inserts a record to the pivot table
+ */
+Route::get('role/attach', function () {
+    $user = User::find(2);
+    $user->roles()->attach(4);
+});
+/**
+ * detach method deletes a record from th pivot table
+ */
+Route::get('role/detach', function () {
+    $user = User::find(2);
+    $user->roles()->detach(4);
+});
+/**
+ * sync mehtod places the data that are in the array
+ */
+
+Route::any('/role/sync', function(){
+   $user = User::findOrFail(2);
+    $user->roles()->sync([1,2,4]);
+});
